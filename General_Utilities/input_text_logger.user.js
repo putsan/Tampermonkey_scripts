@@ -2,7 +2,7 @@
 // @name         Input Text Logger
 // @namespace    https://github.com/putsan
 // @author       @putsan.bsky.social
-// @version      0.1.1
+// @version      0.1.2
 // @description  Track continuous text input on websites and save to Tampermonkey's local storage
 // @icon         https://github.com/putsan/Tampermonkey_scripts/blob/1b111563ad358762c1611a7e1c48544cd4fcf833/resources/icons/image_2023-12-27_22-31-58.png?raw=true
 // @include      *
@@ -172,8 +172,9 @@
   // Додавання обробника подій
   circleBtn.addEventListener("click", togglePopup);
   window.addEventListener("click", function (event) {
-    if (event.target !== circleBtn && event.target !== tmPopup) {
-      closePopup();
+    // Перевірка, чи клік був зроблений поза `circleBtn` та `tmPopup`
+    if (!circleBtn.contains(event.target) && !tmPopup.contains(event.target)) {
+        closePopup();
     }
   });
 })();
