@@ -8,123 +8,166 @@
 // @grant        GM_getValue
 // ==/UserScript==
 
-(function() {
-    'use strict';
+(function () {
+  "use strict";
 
-    let currentText = '';
-    let lastDomain = '';
-    let lastTimestamp = '';
-    let inactivityTimer;
+  let currentText = "";
+  let lastDomain = "";
+  let lastTimestamp = "";
+  let inactivityTimer;
 
-    // Функція для зберігання даних
-function saveData(newText, newDomain, newTimestamp) {
+  // STYLES
+  const popupStyle = `
+      position: fixed;
+      bottom: 100px;
+      right: 10px;
+
+      display: none;
+      flex-direction: column;
+      gap: 10px;
+      width: 200px;
+      padding: 10px;
+
+      background: white;
+      border: 1px solid black;
+  `;
+
+  // Функція для зберігання даних
+  function saveData(newText, newDomain, newTimestamp) {
     // Отримання існуючих даних
-    let existingData = GM_getValue('savedText', []);
-    console.log(23, "до",GM_getValue('savedText'));
-
+    let existingData = GM_getValue("savedText", []);
+    console.log(23, "до", GM_getValue("savedText"));
 
     // Додавання нових даних
-    existingData.push({text: newText, domain: newDomain, timestamp: newTimestamp});
+    existingData.unshift({
+      text: newText,
+      domain: newDomain,
+      timestamp: newTimestamp,
+    });
 
     // Збереження оновлених даних
-    GM_setValue('savedText', existingData);
-    console.log(31, "після",GM_getValue('savedText'));
-}
+    GM_setValue("savedText", existingData);
+    console.log(31, "після", GM_getValue("savedText"));
+  }
 
-
-    function resetInactivityTimer() {
-        clearTimeout(inactivityTimer);
-        inactivityTimer = setTimeout(() => {
-            if (currentText.length > 0) {
-                saveData(currentText, lastDomain, lastTimestamp);
-                currentText = '';
-            }
-        }, 10000); // 10 секунд неактивності
-    }
-
-    document.addEventListener('input', function(event) {
-        const target = event.target;
-        if (target.tagName === 'INPUT' && target.type !== 'password' || target.tagName === 'TEXTAREA') {
-            const domain = window.location.hostname;
-            const timestamp = new Date().toISOString();
-
-            if (domain !== lastDomain) {
-                if (currentText.length > 0) {
-                    saveData(currentText, lastDomain, lastTimestamp);
-                }
-                currentText = target.value;
-                lastDomain = domain;
-                lastTimestamp = timestamp;
-            } else {
-                currentText = target.value;
-            }
-            resetInactivityTimer();
-        }
-    });
-
-    // Обробник події натискання клавіші
-    document.addEventListener('keydown', function(event) {
-        if (event.key === 'Enter') {
-            const domain = window.location.hostname;
-            const timestamp = new Date().toISOString();
-
-            if (currentText.length > 0) {
-                saveData(currentText, domain, timestamp);
-                currentText = '';
-            }
-        }
-    });
-
-    window.addEventListener('blur', function() {
-        if (currentText.length > 0) {
-            saveData(currentText, lastDomain, lastTimestamp);
-            currentText = '';
-        }
-    });
-
-    window.addEventListener('beforeunload', function() {
-    if (currentText.length > 0) {
+  function resetInactivityTimer() {
+    clearTimeout(inactivityTimer);
+    inactivityTimer = setTimeout(() => {
+      if (currentText.length > 0) {
         saveData(currentText, lastDomain, lastTimestamp);
+        currentText = "";
+      }
+    }, 10000); // 10 секунд неактивності
+  }
+
+  document.addEventListener("input", function (event) {
+    const target = event.target;
+    if (
+      (target.tagName === "INPUT" && target.type !== "password") ||
+      target.tagName === "TEXTAREA"
+    ) {
+      const domain = window.location.hostname;
+      const timestamp = new Date().toISOString();
+
+      if (domain !== lastDomain) {
+        if (currentText.length > 0) {
+          saveData(currentText, lastDomain, lastTimestamp);
+        }
+        currentText = target.value;
+        lastDomain = domain;
+        lastTimestamp = timestamp;
+      } else {
+        currentText = target.value;
+      }
+      resetInactivityTimer();
     }
-});
+  });
 
+  // Обробник події натискання клавіші
+  document.addEventListener("keydown", function (event) {
+    if (event.key === "Enter") {
+      const domain = window.location.hostname;
+      const timestamp = new Date().toISOString();
 
-     // Функція для створення попапа
-    function createPopup() {
-        const popupHTML = `
-    <div id="tmPopup" style="position: fixed; bottom: 500px; right: 10px; z-index: 9999; padding: 10px; background: white; border: 1px solid black;">
-        <button id="viewTextBtn">Переглянути текст</button>
-        <button id="deleteDataBtn">Очистити дані</button>
-    </div>
+      if (currentText.length > 0) {
+        saveData(currentText, domain, timestamp);
+        currentText = "";
+      }
+    }
+  });
+
+  window.addEventListener("blur", function () {
+    if (currentText.length > 0) {
+      saveData(currentText, lastDomain, lastTimestamp);
+      currentText = "";
+    }
+  });
+
+  window.addEventListener("beforeunload", function () {
+    if (currentText.length > 0) {
+      saveData(currentText, lastDomain, lastTimestamp);
+    }
+  });
+
+  // Функція для створення попапа
+  function createPopup() {
+    const popupHTML = `
+      <div id="tmPopup" class="pure-u-1-3" style="${popupStyle}">
+          <button id="viewTextBtn" class="pure-button pure-button-primary">Переглянути текст</button>
+          <button id="deleteDataBtn" class="button-warning pure-button">Очистити дані</button>
+      </div>
+  `;
+
+    document.body.insertAdjacentHTML("beforeend", popupHTML);
+
+    // Обробник для кнопки перегляду тексту
+    document
+      .getElementById("viewTextBtn")
+      .addEventListener("click", function () {
+        const savedData = GM_getValue("savedText", {});
+        const dataStr = `Дані: ${JSON.stringify(savedData, null, 2)}`;
+        const newTab = window.open();
+        newTab.document.body.innerText = dataStr;
+      });
+    document
+      .getElementById("deleteDataBtn")
+      .addEventListener("click", function () {
+        GM_setValue("savedText", []);
+      });
+  }
+
+  // Виклик функції для створення попапа
+  createPopup();
+
+  // Створення круглої кнопки
+  const circleBtnHTML = `
+<div id="circleBtn" style="width: 50px; height: 50px; border-radius: 50%; background-color: green; position: fixed; bottom: 100px; right: 10px; z-index: 9999;"></div>
 `;
 
-        document.body.insertAdjacentHTML('beforeend', popupHTML);
+  document.body.insertAdjacentHTML("beforeend", circleBtnHTML);
 
-        // Обробник для кнопки перегляду тексту
-        document.getElementById('viewTextBtn').addEventListener('click', function() {
-            const savedData = GM_getValue('savedText', {});
-            const dataStr = `Дані: ${JSON.stringify(savedData, null, 2)}`;
-            const newTab = window.open();
-            newTab.document.body.innerText = dataStr;
-        });
-        document.getElementById('deleteDataBtn').addEventListener('click', function() {
-            GM_setValue('savedText', []);
-        });
+  const circleBtn = document.getElementById("circleBtn");
+  const tmPopup = document.getElementById("tmPopup");
+
+  // Функція для розкриття попапа
+  function togglePopup() {
+    if (tmPopup.style.display === "none") {
+      tmPopup.style.display = "flex";
+      circleBtn.style.display = "none";
     }
+  }
 
-    // Виклик функції для створення попапа
-    createPopup();
+  // Функція для закриття попапа
+  function closePopup() {
+    tmPopup.style.display = "none";
+    circleBtn.style.display = "block";
+  }
 
-    GM_registerMenuCommand("Відкрити TextTracker", openTextTracker);
-
-    function openTextTracker() {
-    var popup = document.getElementById('tmPopup');
-    if (popup.style.display === 'none') {
-        popup.style.display = 'block';
-    } else {
-        popup.style.display = 'none';
+  // Додавання обробника подій
+  circleBtn.addEventListener("click", togglePopup);
+  window.addEventListener("click", function (event) {
+    if (event.target !== circleBtn && event.target !== tmPopup) {
+      closePopup();
     }
-}
-
-
+  });
 })();
