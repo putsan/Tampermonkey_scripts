@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Input Text Logger
 // @namespace    https://github.com/putsan
-// @version      0.1
+// @version      0.1.1
 // @description  Track continuous text input on websites and save to Tampermonkey's local storage
 // @icon         https://github.com/putsan/Tampermonkey_scripts/blob/1b111563ad358762c1611a7e1c48544cd4fcf833/resources/icons/image_2023-12-27_22-31-58.png
 // @include      *
