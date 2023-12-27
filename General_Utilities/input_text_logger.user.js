@@ -1,9 +1,10 @@
 // ==UserScript==
 // @name         Input Text Logger
 // @namespace    https://github.com/putsan
+// @author       @putsan.bsky.social
 // @version      0.1.1
 // @description  Track continuous text input on websites and save to Tampermonkey's local storage
-// @icon         https://github.com/putsan/Tampermonkey_scripts/blob/1b111563ad358762c1611a7e1c48544cd4fcf833/resources/icons/image_2023-12-27_22-31-58.png
+// @icon         https://github.com/putsan/Tampermonkey_scripts/blob/1b111563ad358762c1611a7e1c48544cd4fcf833/resources/icons/image_2023-12-27_22-31-58.png?raw=true
 // @include      *
 // @grant        GM_setValue
 // @grant        GM_getValue
@@ -145,7 +146,7 @@
   // Створення круглої кнопки
   const circleBtnHTML = `
 <div id="circleBtn" style="width: 35px; height: 35px; border-radius: 50%; background-color: green; position: fixed; bottom: 100px; right: 10px; z-index: 9999;">
-<img src="https://github.com/putsan/Tampermonkey_scripts/blob/1b111563ad358762c1611a7e1c48544cd4fcf833/resources/icons/image_2023-12-27_22-31-58.png" style="width: 35px; height: 35px; border-radius: 50%;">
+<img src="https://github.com/putsan/Tampermonkey_scripts/blob/1b111563ad358762c1611a7e1c48544cd4fcf833/resources/icons/image_2023-12-27_22-31-58.png?raw=true" style="width: 35px; height: 35px; border-radius: 50%;">
 </div>
 `;
 
