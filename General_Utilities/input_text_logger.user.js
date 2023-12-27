@@ -7,6 +7,8 @@
 // @include      *
 // @grant        GM_setValue
 // @grant        GM_getValue
+// @downloadURL  https://github.com/putsan/Tampermonkey_scripts/raw/main/General_Utilities/input_text_logger.user.js
+// @updateURL    https://github.com/putsan/Tampermonkey_scripts/raw/main/General_Utilities/input_text_logger.user.js
 // ==/UserScript==
 
 (function () {
