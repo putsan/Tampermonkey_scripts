@@ -34,7 +34,18 @@
 
       background: white;
       border: 1px solid black;
+      z-idex: 999;
   `;
+
+  // Створення тегу link для бібліотеки Pure.css
+const pureCssLink = document.createElement('link');
+pureCssLink.href = 'https://cdn.jsdelivr.net/npm/purecss@3.0.0/build/pure-min.css';
+pureCssLink.rel = 'stylesheet';
+pureCssLink.type = 'text/css';
+
+// Додавання створеного тегу до секції head веб-сторінки
+document.head.appendChild(pureCssLink);
+
 
   // Функція для зберігання даних
   function saveData(newText, newDomain, newTimestamp) {
@@ -125,14 +136,80 @@
     document.body.insertAdjacentHTML("beforeend", popupHTML);
 
     // Обробник для кнопки перегляду тексту
-    document
-      .getElementById("viewTextBtn")
-      .addEventListener("click", function () {
-        const savedData = GM_getValue("savedText", {});
-        const dataStr = `Дані: ${JSON.stringify(savedData, null, 2)}`;
-        const newTab = window.open();
-        newTab.document.body.innerText = dataStr;
+    document.getElementById("viewTextBtn").addEventListener("click", function () {
+      const savedData = GM_getValue("savedText", []);
+      const newTab = window.open();
+      const head = newTab.document.head;
+      const link = newTab.document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = 'https://cdn.jsdelivr.net/npm/purecss@3.0.0/build/pure-min.css';
+      head.appendChild(link);
+
+      // Стилізація вкладки
+      const style = newTab.document.createElement('style');
+      style.textContent = `
+        body { margin: 0; font-family: sans-serif; background-color: #e7e7e7; }
+        .card { margin-bottom: 15px; padding: 15px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0, 0, 0, .1); }
+        .domain { color: #333; font-size: 14px; }
+        .timestamp { color: #666; font-size: 12px; }
+        .text { margin-top: 10px; }
+      `;
+      head.appendChild(style);
+
+      const body = newTab.document.body;
+
+      // Групування даних за доменом
+      const dataByDomain = savedData.reduce((acc, { text, domain, timestamp }) => {
+        if (!acc[domain]) {
+          acc[domain] = [];
+        }
+        acc[domain].push({ text, timestamp });
+        return acc;
+      }, {});
+
+      // Функція для генерації кольору на основі домену
+      function stringToColor(str) {
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) {
+          hash = str.charCodeAt(i) + ((hash << 5) - hash);
+        }
+        let colour = '#';
+        for (let i = 0; i < 3; i++) {
+          let value = (hash >> (i * 8)) & 0xFF;
+          colour += ('00' + value.toString(16)).substr(-2);
+        }
+        return colour;
+      }
+
+      // Створення карточок з даними
+      Object.keys(dataByDomain).forEach(domain => {
+        const entries = dataByDomain[domain];
+        entries.forEach(({ text, timestamp }) => {
+          const card = newTab.document.createElement('div');
+          card.className = 'card';
+          card.style.backgroundColor = stringToColor(domain);
+
+          const textDiv = newTab.document.createElement('div');
+          textDiv.className = 'text';
+          textDiv.textContent = text;
+          card.appendChild(textDiv);
+
+          const domainDiv = newTab.document.createElement('div');
+          domainDiv.className = 'domain';
+          domainDiv.textContent = `Домен: ${domain}`;
+          card.appendChild(domainDiv);
+
+          const timestampDiv = newTab.document.createElement('div');
+          timestampDiv.className = 'timestamp';
+          timestampDiv.textContent = `Час: ${new Date(timestamp).toLocaleString()}`;
+          card.appendChild(timestampDiv);
+
+          body.appendChild(card);
+        });
       });
+    });
+
+
     document
       .getElementById("deleteDataBtn")
       .addEventListener("click", function () {
