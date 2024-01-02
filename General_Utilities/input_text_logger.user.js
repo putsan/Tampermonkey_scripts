@@ -15,12 +15,13 @@
 (function () {
   "use strict";
 
+    // --- Variables Initialization ---
   let currentText = "";
   let lastDomain = "";
   let lastTimestamp = "";
   let inactivityTimer;
 
-  // STYLES
+// --- Styles for the Popup ---
   const popupStyle = `
       position: fixed;
       bottom: 100px;
@@ -37,7 +38,7 @@
       z-idex: 999;
   `;
 
-  // Створення тегу link для бібліотеки Pure.css
+  // --- External CSS Library Link (Pure.css) ---
 const pureCssLink = document.createElement('link');
 pureCssLink.href = 'https://cdn.jsdelivr.net/npm/purecss@3.0.0/build/pure-min.css';
 pureCssLink.rel = 'stylesheet';
@@ -47,7 +48,13 @@ pureCssLink.type = 'text/css';
 document.head.appendChild(pureCssLink);
 
 
-  // Функція для зберігання даних
+  // --- Function to Save Data ---
+  /**
+   * Saves text, domain, and timestamp to Tampermonkey's local storage.
+   * @param {string} newText - The new text to save.
+   * @param {string} newDomain - The domain from which the text was captured.
+   * @param {string} newTimestamp - The timestamp when the text was saved.
+   */
   function saveData(newText, newDomain, newTimestamp) {
     // Отримання існуючих даних
     let existingData = GM_getValue("savedText", []);
@@ -65,6 +72,7 @@ document.head.appendChild(pureCssLink);
     console.log(31, "після", GM_getValue("savedText"));
   }
 
+  // --- Inactivity Timer Reset Function ---
   function resetInactivityTimer() {
     clearTimeout(inactivityTimer);
     inactivityTimer = setTimeout(() => {
@@ -124,7 +132,7 @@ document.head.appendChild(pureCssLink);
     }
   });
 
-  // Функція для створення попапа
+  // --- Function to Create Popup ---
   function createPopup() {
     const popupHTML = `
       <div id="tmPopup" class="pure-u-1-3" style="${popupStyle}">
