@@ -7,33 +7,42 @@
 // @exclude             *://music.youtube.com/*
 // @exclude             *://*.music.youtube.com/*
 // @grant               none
-// @run-at               document-end
+// @run-at              document-end
 // ==/UserScript==
 
-// Функція для очищення URL для поширення відео
-(function cleanShareUrl() {
-  const sharePanel = document.querySelector('.ytd-unified-share-panel-renderer');
-  if (sharePanel) {
-    const input = sharePanel.querySelector('input');
-    if (input && input.value) {
-      input.value = input.value.split('?')[0];
-      console.log('input.value: ', input.value);
-    }
+(function() {
+  'use strict';
+
+  const targetNode = document.querySelector('tp-yt-paper-dialog');
+
+  if (!targetNode) {
+      console.log('YouTube Clean Tool: No target node found.');
+      return;
   }
-}
 
-// Створення спостерігача для відслідковування змін у DOM
-const observer = new MutationObserver((mutations) => {
-  mutations.forEach((mutation => {
-    if (mutation.addedNodes.length) {
-      cleanShareUrl();
-    }
-  }))
-});
+  const observerOptions = {
+      attributes: true, // спостерігати за змінами атрибутів
+      attributeFilter: ['aria-hidden'] // конкретний атрибут, за яким слід спостерігати
+  };
 
-// Параметри конфігурації спостерігача
-const config = { childList: true, subtree: true };
+  const callback = function(mutationsList, observer) {
+      for(let mutation of mutationsList) {
+          if (mutation.type === 'attributes' && mutation.attributeName === 'aria-hidden') {
+              const sharePanel = document.querySelector('.ytd-unified-share-panel-renderer');
+              if (sharePanel) {
+                  const input = sharePanel.querySelector('input');
+                  if (input) {
+                      const cleanUrl = input.value.split('?')[0];
+                      input.value = cleanUrl; // Очищення URL
+                      console.log('YouTube Clean Tool: URL cleaned to', cleanUrl);
+                  }
+              }
+          }
+      }
+  };
 
-// Початок спостереження
-observer.observe(document.body, config);
-)();
+  const observer = new MutationObserver(callback);
+  observer.observe(targetNode, observerOptions);
+
+  console.log('YouTube Clean Tool: Observer initialized.');
+})();
