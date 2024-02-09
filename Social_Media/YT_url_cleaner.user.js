@@ -24,7 +24,6 @@
         const input = document.querySelector('.ytd-unified-share-panel-renderer input');
         if (input && input.value) {
             input.value = input.value.split('?')[0];
-            console.log('YouTube Clean Tool: URL cleaned to', input.value);
         }
     }
 
